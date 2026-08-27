@@ -1,4 +1,5 @@
 === Student Activity for MasterStudy LMS ===
+Contributors: bluerivergrowth
 Tags: masterstudy, lms, student activity, elearning, engagement
 Requires at least: 6.0
 Tested up to: 7.1
