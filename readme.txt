@@ -68,7 +68,6 @@ A small number of historical usermeta records point at courses that have since b
 == Screenshots ==
 
 1. The Student Activity list with status tiles and filters.
-2. Per-student drill-down with course breakdown and activity timeline.
 
 == Changelog ==
 

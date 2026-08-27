@@ -8,6 +8,11 @@ last-active date, activity streak and membership status, plus a per-student time
 
 > Not affiliated with or endorsed by StyleMix Themes, the makers of MasterStudy LMS.
 
+![The Student Activity screen: status tiles across the top, then a sortable list of students with
+last-active date, active-day counts, lessons completed and membership status.](.wordpress-org/screenshot-1.png)
+
+*Student names and addresses above are fictional.*
+
 ## The problem it solves
 
 MasterStudy records lesson activity in two places, and both have a blind spot:
