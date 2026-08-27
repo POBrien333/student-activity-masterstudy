@@ -178,7 +178,11 @@ final class Recorder {
 			(user_id, course_id, item_id, item_type, event, source, event_time, event_date)
 			VALUES " . implode( ',', $placeholders );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
+		/*
+		 * $sql is built above from a fixed column list plus one (%d,%d,...) tuple
+		 * per row; every value travels in $values through prepare().
+		 */
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
 		$inserted = $wpdb->query( $wpdb->prepare( $sql, $values ) );
 
 		return max( 0, (int) $inserted );

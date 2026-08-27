@@ -101,18 +101,4 @@ final class Schema {
 
 		return $exists;
 	}
-
-	/**
-	 * Drop the table. Only ever called from uninstall.php behind an opt-in.
-	 */
-	public static function drop(): void {
-		global $wpdb;
-
-		$table = self::table();
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$wpdb->query( "DROP TABLE IF EXISTS {$table}" );
-
-		delete_option( self::DB_VERSION_OPTION );
-	}
 }

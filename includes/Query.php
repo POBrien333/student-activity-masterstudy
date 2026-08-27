@@ -130,12 +130,21 @@ final class Query {
 
 		$total = 0;
 
+		/*
+		 * The query text is assembled from base_query() and outer_where(), which
+		 * emit only fixed SQL plus %d/%s placeholders — every user-supplied value
+		 * travels in the params array to prepare(), and ORDER BY comes from a
+		 * whitelist in order_clause(). Static analysis cannot see through the
+		 * assembly, so the sniffs are disabled across the whole statement rather
+		 * than one line of it.
+		 */
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+
 		// The list screen already knows the total from the status-count query, so
 		// it opts out here rather than paying for a third scan of the same data.
 		if ( ! empty( $args['with_total'] ) ) {
 			$count_sql = "SELECT COUNT(*) FROM ({$base['sql']}) s {$where['sql']}";
 
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
 			$total = (int) $wpdb->get_var(
 				$wpdb->prepare( $count_sql, array_merge( $base['params'], $where['params'] ) )
 			);
@@ -143,7 +152,6 @@ final class Query {
 
 		$list_sql = "SELECT * FROM ({$base['sql']}) s {$where['sql']} {$order_by} LIMIT %d OFFSET %d";
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
 		$items = $wpdb->get_results(
 			$wpdb->prepare(
 				$list_sql,
@@ -151,6 +159,7 @@ final class Query {
 			),
 			ARRAY_A
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		foreach ( $items as &$item ) {
 			$item = self::decorate( $item );
@@ -229,7 +238,8 @@ final class Query {
 			$where['params']
 		);
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
+		// Same assembled-SQL situation as get_students(); every value is a placeholder.
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
 		$row = $wpdb->get_row( $wpdb->prepare( $sql, $params ), ARRAY_A );
 
 		if ( ! $row ) {
@@ -270,10 +280,16 @@ final class Query {
 			return $detail;
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		/*
+		 * Every query below reads only this plugin's own table, whose name comes
+		 * from $wpdb->prefix via Schema::table(). A table name cannot be passed as
+		 * a prepare() placeholder, so it has to be interpolated; $user_id and the
+		 * paging values are placeholders as normal.
+		 */
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+
 		$detail['courses'] = $wpdb->get_results(
 			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				"SELECT course_id,
 					MAX(event_time) AS last_activity,
 					MIN(event_time) AS first_activity,
@@ -292,19 +308,15 @@ final class Query {
 		$per_page = max( 1, $events_per_page );
 		$offset   = max( 0, ( $events_page - 1 ) * $per_page );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$detail['total'] = (int) $wpdb->get_var(
 			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				"SELECT COUNT(*) FROM {$table} WHERE user_id = %d",
 				$user_id
 			)
 		);
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$detail['events'] = $wpdb->get_results(
 			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				"SELECT event_date, event_time, event, item_id, item_type, course_id, source
 				FROM {$table}
 				WHERE user_id = %d
@@ -316,6 +328,7 @@ final class Query {
 			),
 			ARRAY_A
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		return $detail;
 	}
@@ -502,7 +515,7 @@ final class Query {
 		$last = isset( $row['last_activity'] ) ? (int) $row['last_activity'] : 0;
 
 		$row['user_id']        = (int) $row['user_id'];
-		$row['last_activity']  = $last ?: null;
+		$row['last_activity']  = $last ? $last : null;
 		$row['status']         = self::status_for( $row['last_activity'] );
 		$row['days_since']     = $last ? (int) floor( ( time() - $last ) / DAY_IN_SECONDS ) : null;
 		$row['has_membership'] = ! empty( $row['membership_id'] );

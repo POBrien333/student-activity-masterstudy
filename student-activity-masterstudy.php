@@ -43,14 +43,14 @@ define( 'MSSA_URL', plugin_dir_url( __FILE__ ) );
  * Keeps the plugin dependency-free — no Composer, no build step.
  */
 spl_autoload_register(
-	function ( $class ) {
+	function ( $class_name ) {
 		$prefix = 'StudentActivityForMasterStudy\\';
 
-		if ( 0 !== strpos( $class, $prefix ) ) {
+		if ( 0 !== strpos( $class_name, $prefix ) ) {
 			return;
 		}
 
-		$relative = substr( $class, strlen( $prefix ) );
+		$relative = substr( $class_name, strlen( $prefix ) );
 		$file     = MSSA_PATH . 'includes/' . str_replace( '\\', '/', $relative ) . '.php';
 
 		if ( is_readable( $file ) ) {

@@ -131,6 +131,11 @@ final class AdminPage {
 			array_splice( $rest, $anchor + 1, 0, array( $ours ) );
 		}
 
+		/*
+		 * Writing to $submenu is the only way to reposition a submenu entry;
+		 * WordPress exposes no API for it. Confined to this plugin's parent menu.
+		 */
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$submenu[ self::MS_PARENT ] = $rest;
 	}
 
@@ -736,6 +741,9 @@ final class AdminPage {
 			);
 		}
 
+		// php://output is an output stream, not a file on disk. WP_Filesystem has no
+		// API for streaming a download, so the stream functions are the only option.
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
 		fclose( $out );
 		exit;
 	}
@@ -767,7 +775,7 @@ final class AdminPage {
 			's'          => $args['search'],
 			'status'     => $args['status'],
 			'membership' => $args['membership'],
-			'course_id'  => $args['course_id'] ?: '',
+			'course_id'  => $args['course_id'] ? $args['course_id'] : '',
 		);
 
 		$query = array_merge( $query, $extra );
@@ -903,6 +911,8 @@ final class AdminPage {
 			array(
 				'post_type'        => 'stm-courses',
 				'post_status'      => array( 'publish', 'draft', 'private' ),
+				// Bounded on purpose: this fills one filter dropdown, not a listing.
+				// phpcs:ignore WordPress.WP.PostsPerPage.posts_per_page_numberposts
 				'numberposts'      => 200,
 				'orderby'          => 'title',
 				'order'            => 'ASC',

@@ -23,7 +23,12 @@ global $wpdb;
 
 $mssa_table = $wpdb->prefix . 'mssa_activity';
 
-// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+/*
+ * Dropping our own table is the whole point of this file, and it only runs when
+ * the site owner ticked the opt-in checked above. The name is built from
+ * $wpdb->prefix and cannot be a prepare() placeholder.
+ */
+// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, PluginCheck.Security.DirectDB.UnescapedDBParameter
 $wpdb->query( "DROP TABLE IF EXISTS {$mssa_table}" );
 
 // Cached report aggregates. The plugin tracks the transient names it created, so

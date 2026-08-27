@@ -1,5 +1,4 @@
 === Student Activity for MasterStudy LMS ===
-Contributors: (your wordpress.org username)
 Tags: masterstudy, lms, student activity, elearning, engagement
 Requires at least: 6.0
 Tested up to: 7.1
