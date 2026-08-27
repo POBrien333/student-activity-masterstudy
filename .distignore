@@ -1,0 +1,15 @@
+# Files that must NOT ship inside the installable plugin.
+#
+# Respected by `wp dist-archive` and by 10up/action-wordpress-plugin-deploy,
+# which uses it to decide what lands in SVN trunk. Note this is separate from
+# .gitignore: everything here IS tracked in git on purpose — it just should not
+# reach end users.
+
+/.wordpress-org
+/.github
+/.git
+/.gitignore
+/.gitattributes
+/.distignore
+/README.md
+/CHANGELOG.md

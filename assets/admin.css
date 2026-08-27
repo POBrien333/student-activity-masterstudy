@@ -1,0 +1,204 @@
+/* Student Activity for MasterStudy LMS — admin styles */
+
+.mssa-muted {
+	color: #646970;
+	font-size: 12px;
+}
+
+/* Summary tiles */
+.mssa-tiles {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+	margin: 16px 0;
+}
+
+.mssa-tile {
+	flex: 1 1 160px;
+	min-width: 140px;
+	padding: 14px 16px;
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-left-width: 4px;
+	border-radius: 4px;
+	text-decoration: none;
+	color: inherit;
+}
+
+.mssa-tile:hover,
+.mssa-tile.is-current {
+	box-shadow: 0 0 0 1px #2271b1;
+	color: inherit;
+}
+
+.mssa-tile__count {
+	display: block;
+	font-size: 26px;
+	font-weight: 600;
+	line-height: 1.2;
+}
+
+.mssa-tile__label {
+	display: block;
+	font-size: 12px;
+	color: #646970;
+}
+
+.mssa-tile--active {
+	border-left-color: #00a32a;
+}
+
+.mssa-tile--slipping {
+	border-left-color: #dba617;
+}
+
+.mssa-tile--dormant {
+	border-left-color: #d63638;
+}
+
+.mssa-tile--never {
+	border-left-color: #8c8f94;
+}
+
+/* Badges */
+.mssa-badge {
+	display: inline-block;
+	padding: 2px 8px;
+	border-radius: 10px;
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.6;
+	white-space: nowrap;
+}
+
+.mssa-badge--active {
+	background: #edfaef;
+	color: #00681f;
+}
+
+.mssa-badge--slipping {
+	background: #fcf5e6;
+	color: #8a6100;
+}
+
+.mssa-badge--dormant {
+	background: #fcf0f1;
+	color: #a02728;
+}
+
+.mssa-badge--never {
+	background: #f0f0f1;
+	color: #50575e;
+}
+
+.mssa-badge--member {
+	background: #f0f6fc;
+	color: #1d5b96;
+}
+
+/* Filter bar */
+.mssa-filters {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: 8px;
+	margin: 12px 0;
+}
+
+.mssa-filters p.search-box {
+	margin: 0;
+	float: none;
+}
+
+/* Detail view */
+.mssa-profile {
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	padding: 12px 18px;
+	margin: 16px 0;
+}
+
+.mssa-stats {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 28px;
+	margin: 12px 0 4px;
+	padding: 0;
+	list-style: none;
+}
+
+.mssa-stats li {
+	margin: 0;
+	font-size: 13px;
+	color: #50575e;
+}
+
+.mssa-stats strong {
+	display: block;
+	font-size: 22px;
+	color: #1d2327;
+}
+
+.mssa-timeline .mssa-day {
+	border-left: 2px solid #dcdcde;
+	margin-left: 6px;
+	padding: 0 0 4px 16px;
+}
+
+.mssa-timeline h3 {
+	margin: 12px 0 4px;
+	font-size: 13px;
+	text-transform: uppercase;
+	letter-spacing: .04em;
+	color: #646970;
+}
+
+.mssa-timeline ul {
+	margin: 0 0 8px;
+}
+
+.mssa-timeline li {
+	margin: 0 0 4px;
+}
+
+.mssa-event {
+	display: inline-block;
+	min-width: 76px;
+	padding: 1px 6px;
+	border-radius: 3px;
+	font-size: 11px;
+	font-weight: 600;
+	text-align: center;
+	text-transform: uppercase;
+	letter-spacing: .03em;
+}
+
+.mssa-event--complete {
+	background: #edfaef;
+	color: #00681f;
+}
+
+.mssa-event--view {
+	background: #f0f6fc;
+	color: #1d5b96;
+}
+
+@media screen and (max-width: 782px) {
+	.mssa-stats {
+		gap: 16px;
+	}
+
+	.mssa-tile {
+		flex-basis: 45%;
+	}
+}
+
+/* Data freshness line */
+.mssa-freshness {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	margin: 12px 0 0;
+}

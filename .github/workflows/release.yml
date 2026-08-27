@@ -1,0 +1,69 @@
+name: Build release zip
+
+# Tag a release and this attaches an installable zip to it.
+#
+# GitHub's own "Source code (zip)" is not a usable plugin installer: its top
+# level folder is named <repo>-<tag>, and WordPress uses that as the plugin
+# directory — so every version would install alongside the last one instead of
+# updating it. This builds a zip whose inner folder is always the plugin slug.
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  SLUG: student-activity-masterstudy
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check the tag matches the plugin header
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          HEADER=$(grep -m1 '^ \* Version:' "$SLUG.php" | sed 's/.*Version: *//' | tr -d '[:space:]')
+          README=$(grep -m1 '^Stable tag:' readme.txt | sed 's/.*Stable tag: *//' | tr -d '[:space:]')
+          echo "tag=$TAG  plugin header=$HEADER  readme.txt=$README"
+          if [ "$TAG" != "$HEADER" ] || [ "$TAG" != "$README" ]; then
+            echo "::error::Version mismatch. Bump the plugin header and readme.txt Stable tag to $TAG before tagging."
+            exit 1
+          fi
+
+      - name: Assemble the plugin folder
+        run: |
+          mkdir -p build/"$SLUG"
+          # rsync honours .distignore directly: it skips blank lines and #
+          # comments, and a leading / anchors to the transfer root, exactly as
+          # `wp dist-archive` reads it. One source of truth for what ships.
+          rsync -a --exclude-from=.distignore ./ build/"$SLUG"/
+
+      - name: Show what is being shipped
+        run: find build -type f | sort
+
+      - name: Create the zip
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          cd build
+          zip -r "../$SLUG-$VERSION.zip" "$SLUG"
+
+      - name: Attach it to the release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ env.SLUG }}-*.zip
+          generate_release_notes: true
+
+      - name: Keep it as a build artifact too
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.SLUG }}
+          path: ${{ env.SLUG }}-*.zip

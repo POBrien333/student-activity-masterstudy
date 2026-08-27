@@ -1,0 +1,17 @@
+# Normalise everything to LF in the repository and on checkout. This is a
+# cross-platform PHP project; CRLF sneaking into the workflow YAML or the
+# dotfiles causes real breakage, and mixed endings make diffs unreadable.
+* text=auto eol=lf
+
+# Never line-ending-convert the listing artwork.
+*.png binary
+
+# Keep development and listing files out of `git archive` tarballs and the
+# auto-generated GitHub release archives. Mirrors .distignore.
+/.wordpress-org  export-ignore
+/.github         export-ignore
+/.gitignore      export-ignore
+/.gitattributes  export-ignore
+/.distignore     export-ignore
+/README.md       export-ignore
+/CHANGELOG.md    export-ignore

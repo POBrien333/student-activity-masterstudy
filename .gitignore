@@ -1,0 +1,14 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Build / dependency output (none currently, but keep releases clean)
+node_modules/
+vendor/
+*.zip
+
+# Local dev
+.env
