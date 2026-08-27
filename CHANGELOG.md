@@ -4,6 +4,24 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.1.1] — 2026-08-27
+
+Housekeeping release. No functional change: no SQL was altered, and the only
+code edits are semantically identical ternaries, a removed dead method and an
+internal parameter rename.
+
+### Fixed
+- Several `phpcs:ignore` comments sat above multi-line statements, where they
+  only cover the single following line — so the violation on the line below was
+  never actually suppressed. Now `phpcs:disable`/`enable` blocks spanning the
+  whole statement, each documenting why the query is safe.
+- `readme.txt` carried an invalid `Contributors` placeholder, which WordPress
+  Plugin Check flagged.
+
+### Removed
+- `Schema::drop()`, which was dead code; its docblock claimed `uninstall.php`
+  called it, but `uninstall.php` issues its own `DROP TABLE`.
+
 ## [0.1.0] — 2026-08-27
 
 First public release.

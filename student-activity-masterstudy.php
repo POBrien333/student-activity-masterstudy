@@ -3,7 +3,7 @@
  * Plugin Name:       Student Activity for MasterStudy LMS
  * Plugin URI:        https://github.com/POBrien333/student-activity-masterstudy
  * Description:       Answers "is this student actually active?" — records every lesson view, including the re-watches MasterStudy does not track, and reports last-active date, activity streaks and membership status in one admin screen.
- * Version:           0.1.0
+ * Version:           0.1.1
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Patrick O'Brien
@@ -32,7 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MSSA_VERSION', '0.1.0' );
+define( 'MSSA_VERSION', '0.1.1' );
 define( 'MSSA_FILE', __FILE__ );
 define( 'MSSA_PATH', plugin_dir_path( __FILE__ ) );
 define( 'MSSA_URL', plugin_dir_url( __FILE__ ) );
