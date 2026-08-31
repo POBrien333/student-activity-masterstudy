@@ -37,6 +37,7 @@ final class AdminPage {
 		add_action( 'admin_post_mssa_settings', array( __CLASS__, 'handle_settings' ) );
 		add_action( 'admin_post_mssa_backfill', array( __CLASS__, 'handle_backfill' ) );
 		add_action( 'admin_post_mssa_refresh', array( __CLASS__, 'handle_refresh' ) );
+		add_action( 'admin_post_mssa_mailchimp', array( __CLASS__, 'handle_mailchimp' ) );
 	}
 
 	/**
@@ -221,6 +222,7 @@ final class AdminPage {
 		<hr class="wp-header-end">
 
 		<?php self::render_backfill_notice(); ?>
+		<?php self::render_mailchimp_preview(); ?>
 
 		<p class="mssa-freshness">
 			<?php
@@ -484,6 +486,48 @@ final class AdminPage {
 		echo '</div>';
 	}
 
+	/**
+	 * Show what a dry run would have changed.
+	 */
+	private static function render_mailchimp_preview(): void {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( empty( $_GET['mssa_mc_preview'] ) ) {
+			return;
+		}
+
+		$report = get_transient( 'mssa_mailchimp_preview' );
+
+		if ( ! is_array( $report ) ) {
+			return;
+		}
+
+		echo '<div class="notice notice-info"><p><strong>';
+		esc_html_e( 'Mailchimp preview — nothing was changed.', 'student-activity-masterstudy' );
+		echo '</strong><br>';
+
+		printf(
+			/* translators: 1: number to tag, 2: tag name, 3: number to untag, 4: number not in audience */
+			esc_html__( 'Would tag %1$d member(s) as "%2$s", remove it from %3$d, and skip %4$d not in the audience.', 'student-activity-masterstudy' ),
+			(int) $report['tagged'],
+			esc_html( (string) $report['tag'] ),
+			(int) $report['untagged'],
+			(int) $report['skipped']
+		);
+
+		if ( ! empty( $report['preview']['add'] ) ) {
+			echo '<br><span class="mssa-muted">'
+				. esc_html__( 'For example: ', 'student-activity-masterstudy' )
+				. esc_html( implode( ', ', array_slice( (array) $report['preview']['add'], 0, 8 ) ) )
+				. '</span>';
+		}
+
+		if ( ! empty( $report['errors'] ) ) {
+			echo '<br><span class="mssa-muted">' . esc_html( implode( '; ', (array) $report['errors'] ) ) . '</span>';
+		}
+
+		echo '</p></div>';
+	}
+
 	private static function render_backfill_notice(): void {
 		$state = Backfill::state();
 
@@ -510,6 +554,50 @@ final class AdminPage {
 		echo ' ';
 		self::render_backfill_button( __( 'Run import now', 'student-activity-masterstudy' ) );
 		echo '</p></div>';
+	}
+
+	/**
+	 * Last-sync line plus the preview and sync buttons.
+	 */
+	private static function render_mailchimp_status(): void {
+		$last = Mailchimp::last_run();
+
+		if ( ! empty( $last['ran_at'] ) ) {
+			echo '<p class="mssa-muted">';
+			printf(
+				/* translators: 1: date, 2: tagged count, 3: untagged count, 4: skipped count */
+				esc_html__( 'Last sync %1$s — %2$d tagged, %3$d untagged, %4$d not in the audience.', 'student-activity-masterstudy' ),
+				esc_html( self::format_timestamp( (int) $last['ran_at'] ) ),
+				(int) ( $last['tagged'] ?? 0 ),
+				(int) ( $last['untagged'] ?? 0 ),
+				(int) ( $last['skipped'] ?? 0 )
+			);
+			echo '</p>';
+
+			if ( ! empty( $last['errors'] ) ) {
+				echo '<p class="mssa-muted"><strong>' . esc_html__( 'Errors:', 'student-activity-masterstudy' ) . '</strong> '
+					. esc_html( implode( '; ', (array) $last['errors'] ) ) . '</p>';
+			}
+		}
+
+		self::render_mailchimp_button( __( 'Preview (changes nothing)', 'student-activity-masterstudy' ), true );
+		echo ' ';
+		self::render_mailchimp_button( __( 'Sync tags now', 'student-activity-masterstudy' ), false );
+
+		echo '<p class="description">'
+			. esc_html__( 'Preview first. It lists who would be tagged without contacting Mailchimp to make changes.', 'student-activity-masterstudy' )
+			. '</p>';
+	}
+
+	private static function render_mailchimp_button( string $label, bool $dry_run ): void {
+		?>
+		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="display:inline">
+			<input type="hidden" name="action" value="mssa_mailchimp">
+			<input type="hidden" name="dry_run" value="<?php echo $dry_run ? 1 : 0; ?>">
+			<?php wp_nonce_field( 'mssa_mailchimp' ); ?>
+			<button type="submit" class="button button-small"><?php echo esc_html( $label ); ?></button>
+		</form>
+		<?php
 	}
 
 	private static function render_refresh_button(): void {
@@ -582,6 +670,37 @@ final class AdminPage {
 					</td>
 				</tr>
 				<tr>
+					<th scope="row"><?php esc_html_e( 'Mailchimp segment', 'student-activity-masterstudy' ); ?></th>
+					<td>
+						<label>
+							<input type="checkbox" name="mailchimp_enabled" value="1" <?php checked( $settings['mailchimp_enabled'], 1 ); ?>>
+							<?php esc_html_e( 'Tag disengaged paying members in Mailchimp once a day', 'student-activity-masterstudy' ); ?>
+						</label>
+						<p class="description">
+							<?php esc_html_e( 'Tags members whose status is Slipping, Dormant or Never started, and removes the tag once they are active again. This plugin never sends email — build the segment and write the campaign in Mailchimp.', 'student-activity-masterstudy' ); ?>
+						</p>
+
+						<p>
+							<label for="mssa-mc-key"><?php esc_html_e( 'API key', 'student-activity-masterstudy' ); ?></label><br>
+							<input type="password" id="mssa-mc-key" name="mailchimp_api_key" class="regular-text"
+								autocomplete="off"
+								value="<?php echo esc_attr( $settings['mailchimp_api_key'] ); ?>"
+								placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-us7">
+						</p>
+						<p>
+							<label for="mssa-mc-list"><?php esc_html_e( 'Audience ID', 'student-activity-masterstudy' ); ?></label><br>
+							<input type="text" id="mssa-mc-list" name="mailchimp_list_id" class="regular-text"
+								value="<?php echo esc_attr( $settings['mailchimp_list_id'] ); ?>">
+						</p>
+						<p>
+							<label for="mssa-mc-tag"><?php esc_html_e( 'Tag', 'student-activity-masterstudy' ); ?></label><br>
+							<input type="text" id="mssa-mc-tag" name="mailchimp_tag" class="regular-text"
+								value="<?php echo esc_attr( $settings['mailchimp_tag'] ); ?>">
+						</p>
+						<?php self::render_mailchimp_status(); ?>
+					</td>
+				</tr>
+				<tr>
 					<th scope="row"><?php esc_html_e( 'Historical import', 'student-activity-masterstudy' ); ?></th>
 					<td>
 						<p>
@@ -626,8 +745,21 @@ final class AdminPage {
 				'slipping_days'       => isset( $_POST['slipping_days'] ) ? absint( $_POST['slipping_days'] ) : null,
 				'count_views'         => ! empty( $_POST['count_views'] ),
 				'delete_on_uninstall' => ! empty( $_POST['delete_on_uninstall'] ),
+				'mailchimp_enabled'   => ! empty( $_POST['mailchimp_enabled'] ),
+				'mailchimp_api_key'   => isset( $_POST['mailchimp_api_key'] )
+					? sanitize_text_field( wp_unslash( $_POST['mailchimp_api_key'] ) )
+					: null,
+				'mailchimp_list_id'   => isset( $_POST['mailchimp_list_id'] )
+					? sanitize_text_field( wp_unslash( $_POST['mailchimp_list_id'] ) )
+					: null,
+				'mailchimp_tag'       => isset( $_POST['mailchimp_tag'] )
+					? sanitize_text_field( wp_unslash( $_POST['mailchimp_tag'] ) )
+					: null,
 			)
 		);
+
+		// Start or stop the daily job to match the checkbox.
+		Mailchimp::sync_schedule();
 
 		wp_safe_redirect( add_query_arg( 'mssa_saved', '1', self::list_url() ) );
 		exit;
@@ -646,6 +778,29 @@ final class AdminPage {
 		Cache::flush();
 
 		wp_safe_redirect( self::list_url() );
+		exit;
+	}
+
+	/**
+	 * Run a Mailchimp tag sync, or preview one.
+	 */
+	public static function handle_mailchimp(): void {
+		if ( ! current_user_can( self::CAPABILITY ) ) {
+			wp_die( esc_html__( 'You do not have permission to do that.', 'student-activity-masterstudy' ) );
+		}
+
+		check_admin_referer( 'mssa_mailchimp' );
+
+		$dry_run = ! empty( $_POST['dry_run'] );
+		$report  = Mailchimp::run( $dry_run );
+
+		if ( $dry_run ) {
+			set_transient( 'mssa_mailchimp_preview', $report, 5 * MINUTE_IN_SECONDS );
+		}
+
+		wp_safe_redirect(
+			add_query_arg( $dry_run ? 'mssa_mc_preview' : 'mssa_mc_synced', '1', self::list_url() )
+		);
 		exit;
 	}
 

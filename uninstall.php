@@ -45,5 +45,7 @@ delete_option( 'mssa_c_keys' );
 delete_option( 'mssa_settings' );
 delete_option( 'mssa_backfill_state' );
 delete_option( 'mssa_db_version' );
+delete_option( 'mssa_mailchimp_state' );
 
 wp_clear_scheduled_hook( 'mssa_backfill_batch' );
+wp_clear_scheduled_hook( 'mssa_mailchimp_sync' );

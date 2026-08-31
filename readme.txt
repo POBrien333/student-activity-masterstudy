@@ -43,6 +43,20 @@ This plugin is not affiliated with or endorsed by StyleMix Themes, the makers of
 
 The import runs via WP-Cron. A notice shows progress, and a "Run import now" button is available if cron is unreliable on your host. Re-running the import never duplicates data.
 
+== External services ==
+
+This plugin can optionally connect to Mailchimp to tag members who have stopped
+studying, so you can build a segment and write a re-engagement campaign there.
+
+The integration is **disabled by default** and does nothing until you enter your
+own Mailchimp API key and audience ID. When enabled, it sends the email address
+of each disengaged member to Mailchimp's API (https://<dc>.api.mailchimp.com) to
+add or remove a tag. No other data leaves your site, and the plugin never sends
+email itself.
+
+Mailchimp terms: https://mailchimp.com/legal/terms/
+Mailchimp privacy policy: https://mailchimp.com/legal/privacy/
+
 == Frequently Asked Questions ==
 
 = Does this need MasterStudy LMS Pro? =

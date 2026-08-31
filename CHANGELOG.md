@@ -4,6 +4,14 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+- Optional Mailchimp integration. Tags paying members whose status is Slipping,
+  Dormant or Never started, and removes the tag once they return, so you can
+  build a re-engagement segment in Mailchimp. Disabled by default; the plugin
+  never sends email itself. Includes a preview that contacts nothing.
+
 ## [0.1.1] — 2026-08-27
 
 Housekeeping release. No functional change: no SQL was altered, and the only

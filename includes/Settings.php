@@ -24,6 +24,10 @@ final class Settings {
 			'slipping_days'       => 90,
 			'count_views'         => 1,
 			'delete_on_uninstall' => 0,
+			'mailchimp_enabled'   => 0,
+			'mailchimp_api_key'   => '',
+			'mailchimp_list_id'   => '',
+			'mailchimp_tag'       => 'inactive-learner',
 		);
 	}
 
@@ -80,6 +84,16 @@ final class Settings {
 			'slipping_days'       => $slipping,
 			'count_views'         => empty( $input['count_views'] ) ? 0 : 1,
 			'delete_on_uninstall' => empty( $input['delete_on_uninstall'] ) ? 0 : 1,
+			'mailchimp_enabled'   => empty( $input['mailchimp_enabled'] ) ? 0 : 1,
+			'mailchimp_api_key'   => isset( $input['mailchimp_api_key'] )
+				? trim( (string) $input['mailchimp_api_key'] )
+				: (string) $current['mailchimp_api_key'],
+			'mailchimp_list_id'   => isset( $input['mailchimp_list_id'] )
+				? sanitize_text_field( (string) $input['mailchimp_list_id'] )
+				: (string) $current['mailchimp_list_id'],
+			'mailchimp_tag'       => isset( $input['mailchimp_tag'] ) && '' !== trim( (string) $input['mailchimp_tag'] )
+				? sanitize_text_field( trim( (string) $input['mailchimp_tag'] ) )
+				: (string) $current['mailchimp_tag'],
 		);
 
 		update_option( self::OPTION, $clean, false );

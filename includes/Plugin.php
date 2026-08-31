@@ -27,6 +27,7 @@ final class Plugin {
 	 */
 	public static function deactivate(): void {
 		Backfill::unschedule();
+		Mailchimp::unschedule();
 	}
 
 	/**
@@ -44,6 +45,7 @@ final class Plugin {
 		// Two add_action calls; the hooks only ever fire inside the course player.
 		Recorder::init();
 		Backfill::init();
+		Mailchimp::init();
 
 		if ( is_admin() ) {
 			AdminPage::init();
