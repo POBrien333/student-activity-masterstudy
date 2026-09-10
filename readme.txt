@@ -4,7 +4,7 @@ Tags: masterstudy, lms, student activity, elearning, engagement
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 0.1.1
+Stable tag: 0.1.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -70,6 +70,13 @@ A small number of historical usermeta records point at courses that have since b
 1. The Student Activity list with status tiles and filters.
 
 == Changelog ==
+
+= 0.1.2 =
+* Fixed: filtering the student list by course showed every student as having no activity. Query parameters were bound out of order, so the course filter compared against a timestamp and matched nothing. The unfiltered list was never affected.
+* Added a regression test and CI covering the query builder.
+
+= 0.1.1 =
+* Housekeeping. Corrected several ineffective phpcs:ignore comments, removed a dead method and fixed an invalid readme header. No functional change.
 
 = 0.1.0 =
 * First public release.

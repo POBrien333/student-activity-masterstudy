@@ -11,5 +11,6 @@
 /.gitignore
 /.gitattributes
 /.distignore
+/tests
 /README.md
 /CHANGELOG.md

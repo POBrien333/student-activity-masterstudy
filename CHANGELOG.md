@@ -4,6 +4,21 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.1.2] — 2026-09-10
+
+### Fixed
+- Filtering the student list by course reported every student as having no
+  activity at all. `$wpdb->prepare()` fills placeholders in SQL-text order, but
+  the parameters were pushed in the order the clauses were assembled, so the
+  course ID landed in a timestamp comparison and a timestamp landed in the course
+  filter — which matched no rows. The unfiltered list was never affected.
+
+### Added
+- `tests/placeholder-order.php`, a dependency-free regression test asserting that
+  every substituted value is the right *kind* of value across six query shapes.
+  It fails against the 0.1.1 code and passes against this one.
+- A CI workflow running that test plus a lint pass on PHP 7.4 and 8.3.
+
 ## [0.1.1] — 2026-08-27
 
 Housekeeping release. No functional change: no SQL was altered, and the only
