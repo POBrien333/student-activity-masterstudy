@@ -360,12 +360,24 @@ final class Query {
 
 		if ( $course_id > 0 ) {
 			$activity_where .= ' AND course_id = %d';
-			$params[]        = $course_id;
 		}
 
+		/*
+		 * prepare() fills placeholders in the order they appear in the SQL TEXT,
+		 * not the order the clauses were assembled in PHP. The three window
+		 * comparisons live in the SELECT list, which precedes the WHERE clause,
+		 * so they must be pushed first — even though $activity_where was built
+		 * above. Getting this backwards silently substitutes a course ID into a
+		 * timestamp comparison and a timestamp into the course filter, which
+		 * matches no rows at all.
+		 */
 		$params[] = $short_since;
 		$params[] = $short_since;
 		$params[] = $long_since;
+
+		if ( $course_id > 0 ) {
+			$params[] = $course_id;
+		}
 
 		$activity_sub = "SELECT user_id,
 				MAX(event_time) AS last_activity,
