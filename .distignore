@@ -11,6 +11,11 @@
 /.gitignore
 /.gitattributes
 /.distignore
+# Local build artefacts — CI never sees these (checkout is tracked files
+# only), but a local `wp dist-archive` would otherwise sweep them in.
+*.zip
+/build
+
 /tests
 /README.md
 /CHANGELOG.md
